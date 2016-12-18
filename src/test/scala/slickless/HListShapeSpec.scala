@@ -4,6 +4,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FreeSpec, Matchers}
 import shapeless.{::, HNil}
+import slick.jdbc.GetResult
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,16 +21,42 @@ class HListShapeSpec extends FreeSpec with Matchers with ScalaFutures {
 
   lazy val users = TableQuery[Users]
 
+  val db = Database.forConfig("h2")
+
   "slick tables with hlist mappings" - {
     "should support inserts and selects" in {
-      val db = Database.forConfig("h2")
+
+
+      users.schema.createStatements.foreach(println)
 
       val action = for {
         _   <- users.schema.create
         _   <- users += 1L :: "dave@example.com" :: HNil
         ans <- users.result.head
-        _   <- users.schema.drop
+        //_   <- users.schema.drop
       } yield ans
+
+      whenReady(db.run(action)) { _ should equal (1L :: "dave@example.com" :: HNil) }
+    }
+  }
+
+  "slick getResult" - {
+    "should return " in {
+
+      users.schema.createStatements.foreach(println)
+
+      lazy val all = sql"""select "id", "email" from "users"""".as[Long :: String :: HNil]
+
+      users.result.statements.foreach(println)
+
+      val action = for {
+        _    <- users.schema.create
+        _    <- users += 1L :: "dave@example.com" :: HNil
+        user <- all.head
+        _   <- users.schema.drop
+      } yield {
+        user
+      }
 
       whenReady(db.run(action)) { _ should equal (1L :: "dave@example.com" :: HNil) }
     }

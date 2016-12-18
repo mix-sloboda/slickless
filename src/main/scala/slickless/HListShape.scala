@@ -2,9 +2,11 @@ package slickless
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
-import shapeless.{ HList, ::, HNil, Generic }
+import shapeless.{::, Generic, HList, HNil}
 import slick.ast.MappedScalaType
-import slick.lifted.{ Shape, ShapeLevel, FlatShapeLevel, MappedProductShape, MappedProjection }
+import slick.jdbc.{GetResult, PositionedResult}
+import slick.lifted.{FlatShapeLevel, MappedProductShape, MappedProjection, Shape, ShapeLevel}
+import slickless.plainsql.GenericGetResult$
 
 final class HListShape[L <: ShapeLevel, M <: HList, U <: HList : ClassTag, P <: HList]
     (val shapes: Seq[Shape[_, _, _, _]]) extends MappedProductShape[L, HList, M, U, P] {
@@ -56,3 +58,5 @@ trait HListShapeImplicits {
       )
   }
 }
+
+
