@@ -4,7 +4,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FreeSpec, Matchers}
 import shapeless.{::, HNil}
-import slick.jdbc.GetResult
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +32,7 @@ class HListShapeSpec extends FreeSpec with Matchers with ScalaFutures {
         _   <- users.schema.create
         _   <- users += 1L :: "dave@example.com" :: HNil
         ans <- users.result.head
-        //_   <- users.schema.drop
+        _   <- users.schema.drop
       } yield ans
 
       whenReady(db.run(action)) { _ should equal (1L :: "dave@example.com" :: HNil) }
